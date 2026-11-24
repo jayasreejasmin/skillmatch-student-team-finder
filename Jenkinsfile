@@ -23,11 +23,11 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat """
-                    set "PATH=%PATH%;C:\\Program Files\\Docker\\Docker\\resources\\bin"
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
+                set "PATH=%PATH%;C:\\Users\\JAYASREE JASMIN\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
                 """
             }
-        }       
+        }           
     }
               
 }
