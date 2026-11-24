@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillMatch — Build Teams Smarter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #f5f4f8;
+      --ink-dark: #141928;
+      --ink-slate: #4f566b;
+      --ink-muted: #7c849b;
+      --blue-primary: #1d63ed;
+      --blue-hover: #154ec2;
+      --green-check: #16a34a;
+      --green-bar: #22e55b;
+      --pill-bg: #eef0ff;
+      --pill-text: #4640de;
+      --card-border: #e6e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--ink-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      /* Subtle paper/grain texture inspired by Ref 1 */
+      background-image: radial-gradient(rgba(79, 86, 107, 0.06) 1px, transparent 0);
+      background-size: 18px 18px;
+    }
+
+    /* === REF 1: Iridescent 3D Pastel Floating Shapes === */
+    .blob-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(2px);
+      opacity: 0.85;
+    }
+
+    /* Top-left mint-yellow glossy tube */
+    .blob-1 {
+      width: 340px;
+      height: 150px;
+      top: -35px;
+      left: -60px;
+      transform: rotate(28deg);
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #d9f99d 28%, #86efac 68%, #6ee7b7 100%);
+      box-shadow: inset -12px -16px 28px rgba(16, 185, 129, 0.25), inset 10px 10px 22px rgba(255, 255, 255, 0.9);
+    }
+
+    /* Top-center soft peach-mint orb */
+    .blob-2 {
+      width: 140px;
+      height: 140px;
+      top: -55px;
+      left: 46%;
+      background: radial-gradient(circle at 35% 30%, #bbf7d0 0%, #fbcfe8 75%, #f9a8d4 100%);
+      box-shadow: inset -8px -10px 20px rgba(219, 39, 119, 0.15);
+    }
+
+    /* Top-right peach-gold curved ring */
+    .blob-3 {
+      width: 330px;
+      height: 290px;
+      top: -60px;
+      right: -70px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff7ed 0%, #fed7aa 40%, #fbcfe8 75%, #fef08a 100%);
+      box-shadow: inset -18px -18px 34px rgba(244, 114, 182, 0.22), inset 14px 14px 26px rgba(255, 255, 255, 0.92);
+    }
+
+    /* Bottom-left periwinkle-pink arch */
+    .blob-4 {
+      width: 310px;
+      height: 260px;
+      bottom: -95px;
+      left: 3%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, #c7d2fe 0%, #a5b4fc 45%, #f9a8d4 95%);
+      box-shadow: inset -14px -14px 28px rgba(99, 102, 241, 0.22), inset 10px 10px 20px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Bottom-right cyan-mint U-loop */
+    .blob-5 {
+      width: 360px;
+      height: 340px;
+      bottom: -110px;
+      right: 2%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #e0f2fe 0%, #99f6e4 45%, #93c5fd 90%);
+      box-shadow: inset -16px -16px 32px rgba(14, 165, 233, 0.22), inset 12px 12px 24px rgba(255, 255, 255, 0.9);
+    }
+
+    /* === Layout Container === */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    /* === Top Navigation (Ref 1 + Ref 2 minimal header) === */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.75rem 0;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--ink-slate);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 2px solid var(--ink-slate);
+      display: grid;
+      place-items: center;
+      font-size: 0.95rem;
+      background: rgba(255,255,255,0.65);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--ink-slate);
+    }
+
+    .active-user-pill {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--card-border);
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 4px 12px rgba(20, 25, 40, 0.04);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-check);
+    }
+
+    /* === REF 1 Typography + REF 2 Split Hero Block Placement === */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr;
+      gap: 3.5rem;
+      align-items: center;
+      padding: 3.5rem 0 4.5rem;
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.35rem, 4.2vw, 3.5rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+      color: var(--ink-dark);
+    }
+
+    /* Ref 1 hollow outline text paired with bold solid text */
+    .outline-word {
+      color: transparent;
+      -webkit-text-stroke: 1.6px var(--ink-slate);
+    }
+
+    .accent-blue {
+      color: var(--blue-primary);
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--ink-slate);
+      max-width: 500px;
+      margin-bottom: 2rem;
+    }
+
+    /* Ref 2 Button Row */
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .btn-primary {
+      background: var(--blue-primary);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(29, 99, 237, 0.25);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--blue-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink-dark);
+      border: 1px solid var(--card-border);
+      padding: 0.85rem 1.65rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #ffffff;
+    }
+
+    /* Ref 2 Green Checkmark Badges */
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.35rem;
+      font-size: 0.85rem;
+      color: var(--ink-slate);
+      font-weight: 500;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .check-badge {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--green-check);
+      color: white;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    /* === REF 2 Right-Side Floating Card (Sign-In + Live AI Match Preview) === */
+    .hero-card-shell {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 22px;
+      padding: 1.15rem;
+      box-shadow: 0 24px 50px rgba(20, 25, 40, 0.08);
+    }
+
+    .gradient-banner {
+      background: linear-gradient(125deg, #2563eb 0%, #6d28d9 60%, #8b5cf6 100%);
+      border-radius: 15px;
+      padding: 1.25rem 1.35rem;
+      color: #fff;
+      margin-bottom: 1.1rem;
+    }
+
+    .banner-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .match-metric {
+      margin-bottom: 0.75rem;
+    }
+
+    .match-metric:last-child { margin-bottom: 0; }
+
+    .metric-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      opacity: 0.95;
+    }
+
+    .progress-track {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green-bar);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .signin-box {
+      padding: 0.35rem 0.25rem 0.15rem;
+    }
+
+    .signin-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--ink-dark);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.72rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: #ffffff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--ink-dark);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus {
+      border-color: var(--blue-primary);
+    }
+
+    /* === REF 3: Featured Projects Section === */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin: 2rem 0 1.75rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink-dark);
+    }
+
+    .section-sub {
+      color: var(--ink-slate);
+      font-size: 0.95rem;
+      margin-top: 0.3rem;
+    }
+
+    .filter-link {
+      color: var(--blue-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Ref 3 Card Grid */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 28px rgba(20, 25, 40, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 34px rgba(20, 25, 40, 0.08);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .project-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--ink-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .match-score-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #15803d;
+      white-space: nowrap;
+    }
+
+    .project-owner {
+      font-size: 0.88rem;
+      color: var(--ink-slate);
+      margin-bottom: 0.85rem;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.95rem;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Ref 3 Pastel Skill Pills */
+    .skills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1.35rem;
+    }
+
+    .skill-pill {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 0.3rem 0.72rem;
+      border-radius: 999px;
+    }
+
+    .skill-pill.matched {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border: 1px solid #93c5fd;
+    }
+
+    /* Ref 3 Full-Width Card Action Button */
+    .card-action-btn {
+      width: 100%;
+      padding: 0.72rem 1rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-join {
+      background: var(--blue-primary);
+      color: #fff;
+    }
+
+    .btn-join:hover { background: var(--blue-hover); }
+
+    .btn-accept {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .btn-disabled {
+      background: #e5e8ef;
+      color: #6b7280;
+      cursor: default;
+    }
+
+    /* Modal for Creating a Project */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 25, 40, 0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      place-items: center;
+      z-index: 20;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--ink-dark);
+      color: #fff;
+      padding: 0.75rem 1.15rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      z-index: 30;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 880px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 2.25rem; padding-top: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ref 1 Pastel 3D Floating Background Shapes -->
+  <div class="blob-layer" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+  </div>
+
+  <div class="container">
+    <!-- Top Header -->
+    <nav>
+      <div class="brand-mark">
+        <div class="brand-logo">SM</div>
+        <span>SKILLMATCH</span>
+      </div>
+      <div class="nav-right">
+        <div class="active-user-pill" id="sessionBadge">
+          <span class="status-dot"></span>
+          <span id="sessionText">Guest Mode — Sign in on right</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Ref 1 Typography + Ref 2 Split Hero & Sign-In Block -->
+    <section class="hero-grid">
+      <div>
+        <h1 class="hero-title">
+          <span class="outline-word">FIND YOUR</span> PERFECT<br/>
+          <span class="accent-blue">TEAM</span> <span class="outline-word">MATCH</span>
+        </h1>
+        <p class="hero-subtitle">
+          Our intelligent platform matches your developer skills with active student projects. No endless scrolling — get ranked team recommendations instantly.
+        </p>
+
+        <div class="cta-row">
+          <button class="btn-primary" onclick="window.location.href='/signin.html'">Get Started</button>
+          <button class="btn-secondary" onclick="openProjectModal()">Post a Project</button>
+        </div>
+
+        <div class="trust-row">
+          <div class="trust-item"><span class="check-badge">✓</span> Free to join</div>
+          <div class="trust-item"><span class="check-badge">✓</span> Skill-ranked</div>
+          <div class="trust-item"><span class="check-badge">✓</span> Instant team match</div>
+        </div>
+      </div>
+
+      <!-- Ref 2 Right Floating Card: AI Match Preview + Student Sign-In -->
+      <div class="hero-card-shell">
+        <div class="gradient-banner">
+          <div class="banner-header">✦ SkillMatch AI</div>
+          <div class="match-metric">
+            <div class="metric-labels">
+              <span id="previewProj1">Full-Stack DevOps Pipeline</span>
+              <span id="previewPct1">95% match</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="previewBar1" style="width: 95%;"></div>
+            </div>
+          </div>
+          <div class="match-metric">
+            <div class="metric-labels">
+              <span id="previewProj2">Cloud Microservices App</span>
+              <span id="previewPct2">82% match</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="previewBar2" style="width: 82%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="signin-box">
+          <div class="signin-title">Sign In / Set Your Skills</div>
+          <form class="form-group" onsubmit="handleSignIn(event)">
+            <input id="userName" placeholder="Your Name (e.g. Jayasree)" required />
+            <input id="userSkills" placeholder="Your Skills (e.g. node, docker, jenkins, react)" required />
+            <button type="submit" class="btn-primary" style="width: 100%;">Continue & Match Skills →</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ref 3 Featured Projects Section -->
+    <section>
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Featured Projects</h2>
+          <p class="section-sub">Browse open student teams — ranked automatically by your skills</p>
+        </div>
+        <button class="filter-link" onclick="toggleMatchedOnly()" id="filterToggleBtn">
+          Show matched only →
+        </button>
+      </div>
+
+      <div class="projects-grid" id="projectsGrid"></div>
+    </section>
+  </div>
+
+  <!-- Create Project Modal -->
+  <div class="modal-backdrop" id="projectModal" onclick="if(event.target===this) closeProjectModal()">
+    <div class="modal-card">
+      <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.35rem;">Create New Project</h3>
+      <p style="font-size: 0.85rem; color: var(--ink-slate); margin-bottom: 1.1rem;">Specify the tech stack you need for your team.</p>
+      <form class="form-group" onsubmit="handleCreateProject(event)">
+        <input id="projTitle" placeholder="Project Title (e.g. Kubernetes Auto-Scaler)" required />
+        <input id="projSkills" placeholder="Required Skills (e.g. docker, jenkins, node)" required />
+        <div style="display: flex; gap: 0.65rem; margin-top: 0.4rem;">
+          <button type="button" class="btn-secondary" style="flex:1;" onclick="closeProjectModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Publish Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentUser = null;
+    let allUsers = [];
+    let allProjects = [];
+    let showMatchedOnly = false;
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    function openProjectModal() {
+      document.getElementById('projectModal').classList.add('open');
+    }
+
+    function closeProjectModal() {
+      document.getElementById('projectModal').classList.remove('open');
+    }
+
+    function toggleMatchedOnly() {
+      showMatchedOnly = !showMatchedOnly;
+      document.getElementById('filterToggleBtn').textContent = showMatchedOnly
+        ? 'Show all projects →'
+        : 'Show matched only →';
+      renderProjects();
+    }
+    const savedUser = localStorage.getItem('skillmatch_user');
+if (savedUser) {
+  currentUser = JSON.parse(savedUser);
+  document.getElementById('sessionText').textContent =
+    `${currentUser.name} (${currentUser.skills.join(', ')}) · Switch`;
+}
+
+    // Seed 2 starter projects on first load if backend is empty so cards look great immediately
+    
+    async function seedInitialProjectsIfEmpty() {
+      const res = await fetch('/api/projects');
+      const existing = await res.json();
+      if (existing.length === 0) {
+        await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'CI/CD Pipeline Automator',
+            ownerId: null,
+            requiredSkills: ['docker', 'jenkins', 'node', 'github']
+          })
+        });
+        await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'Full Stack Cloud Tracker',
+            ownerId: null,
+            requiredSkills: ['react', 'node', 'kubernetes', 'mongodb']
+          })
+        });
+      }
+    }
+
+    async function loadData() {
+      const [usersRes, projectsRes] = await Promise.all([
+        fetch('/api/users'),
+        fetch('/api/projects')
+      ]);
+      allUsers = await usersRes.json();
+      allProjects = await projectsRes.json();
+      updateAiPreview();
+      renderProjects();
+    }
+
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const name = document.getElementById('userName').value.trim();
+      const skills = document.getElementById('userSkills').value.trim();
+
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, skills })
+      });
+      currentUser = await res.json();
+
+      document.getElementById('sessionText').textContent =
+        `${currentUser.name} (${currentUser.skills.join(', ')})`;
+      showToast(`Signed in as ${currentUser.name}`);
+      await loadData();
+    }
+
+    async function handleCreateProject(e) {
+      e.preventDefault();
+      const title = document.getElementById('projTitle').value.trim();
+      const requiredSkills = document.getElementById('projSkills').value.trim();
+
+      await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          ownerId: currentUser ? currentUser.id : null,
+          requiredSkills
+        })
+      });
+
+      document.getElementById('projTitle').value = '';
+      document.getElementById('projSkills').value = '';
+      closeProjectModal();
+      showToast('Project published!');
+      await loadData();
+    }
+
+    async function requestToJoin(projectId) {
+      if (!currentUser) {
+        showToast('Sign in with your name & skills first!');
+        document.getElementById('userName').focus();
+        return;
+      }
+      await fetch(`/api/projects/${projectId}/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.id })
+      });
+      showToast('Join request sent!');
+      await loadData();
+    }
+
+    async function acceptApplicant(projectId, userId) {
+      await fetch(`/api/projects/${projectId}/requests/${userId}/accept`, {
+        method: 'POST'
+      });
+      showToast('Teammate accepted into project!');
+      await loadData();
+    }
+
+    function computeMatchPct(project) {
+      if (!currentUser || !project.requiredSkills.length) return 0;
+      const overlap = project.requiredSkills.filter(s => currentUser.skills.includes(s)).length;
+      return Math.round((overlap / project.requiredSkills.length) * 100);
+    }
+
+    function updateAiPreview() {
+      if (!allProjects.length) return;
+      const ranked = allProjects
+        .map(p => ({ title: p.title, pct: currentUser ? computeMatchPct(p) : 92 }))
+        .sort((a, b) => b.pct - a.pct);
+
+      if (ranked[0]) {
+        document.getElementById('previewProj1').textContent = ranked[0].title;
+        document.getElementById('previewPct1').textContent = `${ranked[0].pct}% match`;
+        document.getElementById('previewBar1').style.width = `${Math.max(ranked[0].pct, 12)}%`;
+      }
+      if (ranked[1]) {
+        document.getElementById('previewProj2').textContent = ranked[1].title;
+        document.getElementById('previewPct2').textContent = `${ranked[1].pct}% match`;
+        document.getElementById('previewBar2').style.width = `${Math.max(ranked[1].pct, 12)}%`;
+      }
+    }
+
+    function renderProjects() {
+      const grid = document.getElementById('projectsGrid');
+      let list = [...allProjects];
+
+      if (currentUser) {
+        list.sort((a, b) => computeMatchPct(b) - computeMatchPct(a));
+        if (showMatchedOnly) {
+          list = list.filter(p => computeMatchPct(p) > 0);
+        }
+      }
+
+      if (!list.length) {
+        grid.innerHTML = `<p style="color: var(--ink-slate);">No matching projects yet. Create one using "Post a Project"!</p>`;
+        return;
+      }
+
+      grid.innerHTML = list.map(proj => {
+        const owner = allUsers.find(u => u.id === proj.ownerId);
+        const ownerName = owner ? owner.name : 'DevOps Lead';
+        const matchPct = computeMatchPct(proj);
+
+        const isMember = currentUser && proj.team.includes(currentUser.id);
+        const hasRequested = currentUser && proj.requests.includes(currentUser.id);
+        const isOwner = currentUser && proj.ownerId === currentUser.id;
+        const pendingApplicantId = proj.requests[0];
+        const pendingApplicant = allUsers.find(u => u.id === pendingApplicantId);
+
+        const skillBadges = proj.requiredSkills.map(skill => {
+          const isMatched = currentUser && currentUser.skills.includes(skill);
+          return `<span class="skill-pill ${isMatched ? 'matched' : ''}">${skill}</span>`;
+        }).join('');
+
+        let actionHtml = '';
+        if (isOwner && pendingApplicant) {
+          actionHtml = `<button class="card-action-btn btn-accept" onclick="acceptApplicant(${proj.id}, ${pendingApplicant.id})">✓ Accept ${pendingApplicant.name} to Team</button>`;
+        } else if (isMember) {
+          actionHtml = `<button class="card-action-btn btn-disabled" disabled>✓ You are on this team</button>`;
+        } else if (hasRequested) {
+          actionHtml = `<button class="card-action-btn btn-disabled" disabled>⏳ Request Pending</button>`;
+        } else {
+          actionHtml = `<button class="card-action-btn btn-join" onclick="requestToJoin(${proj.id})">Request to Join Team</button>`;
+        }
+
+        return `
+          <article class="project-card">
+            <div>
+              <div class="card-top">
+                <h3 class="project-title">${proj.title}</h3>
+                ${currentUser ? `<span class="match-score-pill">${matchPct}% match</span>` : ''}
+              </div>
+              <div class="project-owner">Lead: ${ownerName}</div>
+              <div class="meta-row">
+                <span>📍 Remote / Campus</span>
+                <span>👥 ${proj.team.length} Members</span>
+                <span>📩 ${proj.requests.length} Requests</span>
+              </div>
+              <div class="skills-row">${skillBadges}</div>
+            </div>
+            ${actionHtml}
+          </article>
+        `;
+      }).join('');
+    }
+
+    (async () => {
+      await seedInitialProjectsIfEmpty();
+      await loadData();
+    })();
+  </script>
+</body>
+</html>

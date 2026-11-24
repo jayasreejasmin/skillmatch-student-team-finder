@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace — SkillMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #f5f4f8;
+      --ink-dark: #141928;
+      --ink-slate: #4f566b;
+      --ink-muted: #7c849b;
+      --blue-primary: #1d63ed;
+      --blue-hover: #154ec2;
+      --green-check: #16a34a;
+      --pill-bg: #eef0ff;
+      --pill-text: #4640de;
+      --card-border: #e6e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--ink-dark);
+      min-height: 100vh;
+      background-image: radial-gradient(rgba(79, 86, 107, 0.06) 1px, transparent 0);
+      background-size: 18px 18px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Pastel 3D Floating Blobs */
+    .blob-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .blob { position: absolute; border-radius: 999px; filter: blur(2px); opacity: 0.75; }
+    .blob-1 { width: 320px; height: 140px; top: -40px; left: -60px; transform: rotate(26deg); background: radial-gradient(circle at 30% 30%, #fff, #d9f99d 30%, #86efac 75%); }
+    .blob-3 { width: 300px; height: 270px; top: -70px; right: -70px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff7ed, #fed7aa 45%, #fbcfe8 85%); }
+    .blob-5 { width: 320px; height: 300px; bottom: -120px; right: 2%; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #e0f2fe, #99f6e4 50%, #93c5fd 90%); }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.75rem 4rem;
+    }
+
+    /* Top Navbar */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid rgba(230, 232, 240, 0.8);
+      margin-bottom: 1.75rem;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--ink-slate);
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 2px solid var(--ink-slate);
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      position: relative;
+    }
+
+    .btn-primary {
+      background: var(--blue-primary);
+      color: #fff;
+      border: none;
+      padding: 0.65rem 1.15rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.86rem;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(29, 99, 237, 0.22);
+    }
+
+    .btn-primary:hover { background: var(--blue-hover); }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink-dark);
+      border: 1px solid var(--card-border);
+      padding: 0.62rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* Notification Button & Popup */
+    .notif-wrapper { position: relative; }
+
+    .notif-btn {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.58rem 0.85rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      color: var(--ink-dark);
+    }
+
+    .notif-badge {
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.1rem 0.42rem;
+      border-radius: 999px;
+      display: none;
+    }
+
+    .notif-badge.visible { display: inline-block; }
+
+    .notif-popup {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      width: 340px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 20px 45px rgba(20, 25, 40, 0.14);
+      padding: 1rem;
+      display: none;
+      z-index: 50;
+    }
+
+    .notif-popup.open { display: block; }
+
+    .notif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 0.65rem;
+    }
+
+    .notif-list {
+      max-height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .notif-item {
+      background: #f8f9fc;
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.81rem;
+      line-height: 1.45;
+      color: var(--ink-dark);
+      border-left: 3px solid var(--blue-primary);
+    }
+
+    .notif-item.unread { background: #eff6ff; font-weight: 500; }
+    .notif-time { font-size: 0.7rem; color: var(--ink-muted); margin-top: 0.25rem; }
+
+    /* Two-Column Workspace Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 0.85fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .feed-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .feed-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .feed-sub {
+      font-size: 0.9rem;
+      color: var(--ink-slate);
+      margin-top: 0.25rem;
+    }
+
+    /* Project Cards List (Scrollable Main Screen) */
+    .projects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.45rem 1.6rem;
+      box-shadow: 0 10px 26px rgba(20, 25, 40, 0.04);
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(20, 25, 40, 0.08);
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .project-title {
+      font-size: 1.16rem;
+      font-weight: 800;
+      color: var(--ink-dark);
+    }
+
+    /* Highlighted Project Leader Pill */
+    .leader-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+      border: 1px solid #c7d2fe;
+      color: #3730a3;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.32rem 0.78rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+
+    .match-badge {
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* Two-sentence Project Description */
+    .project-desc {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--ink-slate);
+      margin-bottom: 1rem;
+    }
+
+    .skills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .skill-pill {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 0.3rem 0.72rem;
+      border-radius: 999px;
+    }
+
+    .skill-pill.matched {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border: 1px solid #93c5fd;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid #f0f2f7;
+    }
+
+    .team-avatars {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+
+    .btn-card {
+      padding: 0.62rem 1.15rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .btn-request { background: var(--blue-primary); color: #fff; }
+    .btn-request:hover { background: var(--blue-hover); }
+    .btn-pending { background: #fef3c7; color: #b45309; cursor: default; }
+    .btn-joined { background: #dcfce7; color: #15803d; }
+
+    /* Right Sidebar Panels */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.35rem;
+      position: sticky;
+      top: 1.25rem;
+    }
+
+    .side-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.98);
+      border-radius: 20px;
+      padding: 1.35rem;
+      box-shadow: 0 14px 35px rgba(20, 25, 40, 0.06);
+    }
+
+    .profile-banner {
+      background: linear-gradient(125deg, #2563eb 0%, #6d28d9 100%);
+      color: #fff;
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      margin-bottom: 1rem;
+    }
+
+    .profile-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .profile-role {
+      font-size: 0.78rem;
+      opacity: 0.88;
+      margin-top: 0.15rem;
+    }
+
+    .side-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+      margin-bottom: 0.55rem;
+    }
+
+    .edit-skills-btn {
+      margin-top: 0.75rem;
+      width: 100%;
+      background: #f3f5fa;
+      color: var(--ink-dark);
+      border: 1px solid var(--card-border);
+      padding: 0.55rem;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .edit-skills-btn:hover { background: #e8ecf5; }
+
+    .edit-box {
+      display: none;
+      margin-top: 0.75rem;
+      gap: 0.5rem;
+      flex-direction: column;
+    }
+
+    .edit-box.open { display: flex; }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      border-radius: 9px;
+      border: 1px solid var(--card-border);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    input:focus, textarea:focus { border-color: var(--blue-primary); }
+
+    /* Incoming Request Review Box (For Project Leaders like Pranathi) */
+    .request-item {
+      background: #f8f9fc;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.85rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .request-item:last-child { margin-bottom: 0; }
+
+    .req-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+
+    .btn-accept {
+      flex: 1;
+      background: var(--green-check);
+      color: #fff;
+      border: none;
+      padding: 0.48rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-decline {
+      flex: 1;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: none;
+      padding: 0.48rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Group Chat Panel */
+    .chat-select {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border-radius: 9px;
+      border: 1px solid var(--card-border);
+      font-size: 0.83rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      background: #fff;
+    }
+
+    .chat-members {
+      font-size: 0.76rem;
+      color: var(--ink-slate);
+      margin-bottom: 0.65rem;
+      background: #f4f6fb;
+      padding: 0.45rem 0.65rem;
+      border-radius: 8px;
+    }
+
+    .chat-box {
+      height: 210px;
+      overflow-y: auto;
+      background: #f8f9fc;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .chat-msg {
+      max-width: 85%;
+      padding: 0.52rem 0.75rem;
+      border-radius: 11px;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .chat-msg.mine {
+      align-self: flex-end;
+      background: var(--blue-primary);
+      color: #fff;
+    }
+
+    .chat-msg.theirs {
+      align-self: flex-start;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      color: var(--ink-dark);
+    }
+
+    .chat-msg.system {
+      align-self: center;
+      background: #eef0ff;
+      color: #4640de;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+
+    .chat-meta {
+      font-size: 0.68rem;
+      opacity: 0.78;
+      margin-bottom: 0.15rem;
+    }
+
+    .chat-form {
+      display: flex;
+      gap: 0.45rem;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 25, 40, 0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      place-items: center;
+      z-index: 60;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 1.65rem;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--ink-dark);
+      color: #fff;
+      padding: 0.75rem 1.15rem;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      z-index: 70;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 920px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob-layer" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-5"></div>
+  </div>
+
+  <div class="container">
+    <!-- Top Header -->
+    <nav>
+      <a href="/dashboard.html" class="brand-mark">
+        <div class="brand-logo">SM</div>
+        <span>SKILLMATCH</span>
+      </a>
+
+      <div class="nav-actions">
+        <button class="btn-primary" onclick="openModal()">+ Create Project</button>
+
+        <!-- Notification Bell & Popup -->
+        <div class="notif-wrapper">
+          <button class="notif-btn" onclick="toggleNotifications()">
+            <span>🔔</span>
+            <span>Alerts</span>
+            <span class="notif-badge" id="notifBadge">0</span>
+          </button>
+          <div class="notif-popup" id="notifPopup">
+            <div class="notif-header">
+              <span>Notifications</span>
+              <button style="background:none;border:none;color:var(--blue-primary);font-size:0.76rem;font-weight:600;cursor:pointer;" onclick="markAllRead()">Mark read</button>
+            </div>
+            <div class="notif-list" id="notifList">
+              <p style="font-size:0.8rem;color:var(--ink-muted);">No notifications yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <a href="/signin.html" class="btn-outline" onclick="localStorage.removeItem('skillmatch_user')">Switch User</a>
+      </div>
+    </nav>
+
+    <!-- Main Workspace: Left Scrollable Projects + Right Profile & Chat -->
+    <div class="workspace-grid">
+      <!-- Left: Scrollable Remaining Projects Feed -->
+      <main>
+        <div class="feed-header">
+          <h1 class="feed-title">Explore Open Projects</h1>
+          <p class="feed-sub">Scroll through active teams, inspect project leaders, and request to join.</p>
+        </div>
+
+        <div class="projects-list" id="projectsList"></div>
+      </main>
+
+      <!-- Right: Profile + Incoming Requests + Group Chat -->
+      <aside class="sidebar">
+        <!-- 1. User Profile & Skills Card -->
+        <section class="side-card">
+          <div class="profile-banner">
+            <div class="profile-name" id="profileName">Loading...</div>
+            <div class="profile-role" id="profileMeta">Student Builder</div>
+          </div>
+
+          <div class="side-label">Your Skills</div>
+          <div class="skills-row" id="profileSkills" style="margin-bottom:0;"></div>
+
+          <button class="edit-skills-btn" onclick="toggleEditSkills()">✎ Edit Skills</button>
+
+          <form class="edit-box" id="editSkillsBox" onsubmit="saveEditedSkills(event)">
+            <input id="editSkillsInput" placeholder="e.g. docker, jenkins, react, node" required />
+            <button type="submit" class="btn-primary" style="width:100%;">Save Updated Skills</button>
+          </form>
+        </section>
+
+        <!-- 2. Leader Review Panel (Visible when someone requests to join your project) -->
+        <section class="side-card" id="requestsPanel" style="display:none;">
+          <div class="side-label">Pending Join Requests (Review Profile)</div>
+          <div id="incomingRequestsList"></div>
+        </section>
+
+        <!-- 3. Team Group Chat Panel -->
+        <section class="side-card">
+          <div class="side-label">💬 Team Group Chat</div>
+          <div id="chatContainer">
+            <p style="font-size:0.83rem;color:var(--ink-slate);">
+              Create a project or get accepted into a team to unlock group messaging.
+            </p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Create Project Modal -->
+  <div class="modal-backdrop" id="projectModal" onclick="if(event.target===this) closeModal()">
+    <form class="modal-card" onsubmit="createProject(event)">
+      <h3 style="font-size:1.2rem;font-weight:800;">Launch a New Project</h3>
+      <p style="font-size:0.83rem;color:var(--ink-slate);">You will be highlighted as the Project Leader.</p>
+      <input id="newProjTitle" placeholder="Project Title (e.g. Kubernetes CI/CD Hub)" required />
+      <textarea id="newProjDesc" rows="3" placeholder="Short 2-sentence description of what you're building and who you need..." required></textarea>
+      <input id="newProjSkills" placeholder="Required Skills (e.g. docker, jenkins, node)" required />
+      <div style="display:flex;gap:0.6rem;margin-top:0.25rem;">
+        <button type="button" class="btn-outline" style="flex:1;" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1;">Publish Project</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentUser = JSON.parse(localStorage.getItem('skillmatch_user') || 'null');
+    if (!currentUser) {
+      window.location.href = '/signin.html';
+    }
+
+    let allProjects = [];
+    let selectedChatProjectId = null;
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    function openModal() { document.getElementById('projectModal').classList.add('open'); }
+    function closeModal() { document.getElementById('projectModal').classList.remove('open'); }
+
+    function toggleEditSkills() {
+      const box = document.getElementById('editSkillsBox');
+      box.classList.toggle('open');
+      if (box.classList.contains('open')) {
+        document.getElementById('editSkillsInput').value = currentUser.skills.join(', ');
+      }
+    }
+
+    async function saveEditedSkills(e) {
+      e.preventDefault();
+      const skills = document.getElementById('editSkillsInput').value;
+      const res = await fetch(`/api/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skills })
+      });
+      currentUser = await res.json();
+      localStorage.setItem('skillmatch_user', JSON.stringify(currentUser));
+      document.getElementById('editSkillsBox').classList.remove('open');
+      showToast('Skills updated!');
+      renderProfile();
+      renderProjects();
+    }
+
+    function renderProfile() {
+      document.getElementById('profileName').textContent = currentUser.name;
+      document.getElementById('profileMeta').textContent = `Builder ID #${currentUser.id} · Active`;
+      document.getElementById('profileSkills').innerHTML = currentUser.skills.length
+        ? currentUser.skills.map(s => `<span class="skill-pill">${s}</span>`).join('')
+        : `<span style="font-size:0.8rem;color:var(--ink-muted);">No skills added yet</span>`;
+    }
+
+    function computeMatchPct(project) {
+      if (!currentUser || !project.requiredSkills.length) return 0;
+      const matched = project.requiredSkills.filter(s => currentUser.skills.includes(s)).length;
+      return Math.round((matched / project.requiredSkills.length) * 100);
+    }
+
+    async function loadDashboard() {
+      const [projRes, notifRes] = await Promise.all([
+        fetch('/api/projects'),
+        fetch(`/api/users/${currentUser.id}/notifications`)
+      ]);
+      allProjects = await projRes.json();
+      const notifications = await notifRes.json();
+
+      renderProfile();
+      renderProjects();
+      renderIncomingRequests();
+      renderChatPanel();
+      renderNotifications(notifications);
+    }
+
+    function renderProjects() {
+      const container = document.getElementById('projectsList');
+
+      // Show remaining projects (projects led by others first, followed by your own)
+      const sorted = [...allProjects].sort((a, b) => {
+        const aMine = a.ownerId === currentUser.id ? 1 : 0;
+        const bMine = b.ownerId === currentUser.id ? 1 : 0;
+        if (aMine !== bMine) return aMine - bMine;
+        return computeMatchPct(b) - computeMatchPct(a);
+      });
+
+      container.innerHTML = sorted.map(proj => {
+        const isOwner = proj.ownerId === currentUser.id;
+        const isMember = proj.team.includes(currentUser.id);
+        const isPending = proj.requests.includes(currentUser.id);
+        const matchPct = computeMatchPct(proj);
+
+        const skillPills = proj.requiredSkills.map(skill => {
+          const hit = currentUser.skills.includes(skill);
+          return `<span class="skill-pill ${hit ? 'matched' : ''}">${skill}</span>`;
+        }).join('');
+
+        const memberNames = proj.teamMembers.map(m => m.name).join(', ') || 'Open';
+
+        let btnHtml = '';
+        if (isOwner) {
+          btnHtml = `<button class="btn-card btn-joined" onclick="focusChat(${proj.id})">👑 Your Project · Open Chat</button>`;
+        } else if (isMember) {
+          btnHtml = `<button class="btn-card btn-joined" onclick="focusChat(${proj.id})">✓ Team Member · Open Chat</button>`;
+        } else if (isPending) {
+          btnHtml = `<button class="btn-card btn-pending" disabled>⏳ Request Sent to ${proj.ownerName}</button>`;
+        } else {
+          btnHtml = `<button class="btn-card btn-request" onclick="sendJoinRequest(${proj.id})">Request to Join Team</button>`;
+        }
+
+        return `
+          <article class="project-card">
+            <div class="card-top-row">
+              <h2 class="project-title">${proj.title}</h2>
+              <span class="match-badge">${matchPct}% skill match</span>
+            </div>
+
+            <div class="leader-highlight">
+              👑 Project Leader: <span>${proj.ownerName}</span>
+            </div>
+
+            <p class="project-desc">${proj.description}</p>
+
+            <div class="skills-row">${skillPills}</div>
+
+            <div class="card-footer">
+              <div class="team-avatars">👥 Team (${proj.teamMembers.length}): ${memberNames}</div>
+              ${btnHtml}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderIncomingRequests() {
+      const panel = document.getElementById('requestsPanel');
+      const list = document.getElementById('incomingRequestsList');
+
+      const ownedWithRequests = allProjects.filter(
+        p => p.ownerId === currentUser.id && p.pendingUsers && p.pendingUsers.length > 0
+      );
+
+      if (!ownedWithRequests.length) {
+        panel.style.display = 'none';
+        return;
+      }
+
+      panel.style.display = 'block';
+      list.innerHTML = ownedWithRequests.flatMap(proj =>
+        proj.pendingUsers.map(applicant => {
+          const overlap = proj.requiredSkills.filter(s => applicant.skills.includes(s));
+          return `
+            <div class="request-item">
+              <div style="font-size:0.86rem;font-weight:700;color:var(--ink-dark);">
+                ${applicant.name} wants to join <em>${proj.title}</em>
+              </div>
+              <div style="font-size:0.78rem;color:var(--ink-slate);margin-top:0.25rem;">
+                <strong>Applicant Skills:</strong> ${applicant.skills.join(', ') || 'None listed'}
+              </div>
+              <div style="font-size:0.75rem;color:#15803d;font-weight:600;margin-top:0.2rem;">
+                Matched Skills (${overlap.length}/${proj.requiredSkills.length}): ${overlap.join(', ') || 'None'}
+              </div>
+              <div class="req-actions">
+                <button class="btn-accept" onclick="handleDecision(${proj.id}, ${applicant.id}, 'accept')">✓ Accept</button>
+                <button class="btn-decline" onclick="handleDecision(${proj.id}, ${applicant.id}, 'decline')">✕ Decline</button>
+              </div>
+            </div>
+          `;
+        })
+      ).join('');
+    }
+
+    function renderChatPanel() {
+      const container = document.getElementById('chatContainer');
+      const myTeams = allProjects.filter(p => p.team.includes(currentUser.id));
+
+      if (!myTeams.length) {
+        container.innerHTML = `
+          <p style="font-size:0.83rem;color:var(--ink-slate);">
+            Create a project or get accepted into a team to unlock group messaging.
+          </p>`;
+        return;
+      }
+
+      if (!selectedChatProjectId || !myTeams.some(t => t.id === selectedChatProjectId)) {
+        selectedChatProjectId = myTeams[0].id;
+      }
+
+      const activeProj = myTeams.find(t => t.id === selectedChatProjectId);
+      const membersStr = activeProj.teamMembers.map(m => m.name).join(', ');
+
+      const messagesHtml = activeProj.messages.length
+        ? activeProj.messages.map(m => {
+            if (m.senderId === 0) {
+              return `<div class="chat-msg system">${m.text}</div>`;
+            }
+            const mine = m.senderId === currentUser.id;
+            return `
+              <div class="chat-msg ${mine ? 'mine' : 'theirs'}">
+                <div class="chat-meta">${mine ? 'You' : m.senderName} · ${m.time}</div>
+                <div>${m.text}</div>
+              </div>`;
+          }).join('')
+        : `<p style="font-size:0.78rem;color:var(--ink-muted);text-align:center;margin:auto;">Start the conversation with your team!</p>`;
+
+      container.innerHTML = `
+        <select class="chat-select" onchange="selectedChatProjectId = Number(this.value); renderChatPanel();">
+          ${myTeams.map(t => `<option value="${t.id}" ${t.id === selectedChatProjectId ? 'selected' : ''}>${t.title}</option>`).join('')}
+        </select>
+        <div class="chat-members"><strong>Group Members:</strong> ${membersStr}</div>
+        <div class="chat-box" id="chatBoxScroll">${messagesHtml}</div>
+        <form class="chat-form" onsubmit="sendChatMessage(event)">
+          <input id="chatInput" placeholder="Message your team..." required />
+          <button type="submit" class="btn-primary" style="padding:0.55rem 0.9rem;">Send</button>
+        </form>
+      `;
+
+      const box = document.getElementById('chatBoxScroll');
+      if (box) box.scrollTop = box.scrollHeight;
+    }
+
+    function focusChat(projectId) {
+      selectedChatProjectId = projectId;
+      renderChatPanel();
+      document.getElementById('chatInput')?.focus();
+    }
+
+    async function sendChatMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text || !selectedChatProjectId) return;
+
+      await fetch(`/api/projects/${selectedChatProjectId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senderId: currentUser.id, text })
+      });
+      input.value = '';
+      await loadDashboard();
+    }
+
+    async function createProject(e) {
+      e.preventDefault();
+      const title = document.getElementById('newProjTitle').value.trim();
+      const description = document.getElementById('newProjDesc').value.trim();
+      const requiredSkills = document.getElementById('newProjSkills').value.trim();
+
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          ownerId: currentUser.id,
+          requiredSkills
+        })
+      });
+      const created = await res.json();
+      selectedChatProjectId = created.id;
+
+      document.getElementById('newProjTitle').value = '';
+      document.getElementById('newProjDesc').value = '';
+      document.getElementById('newProjSkills').value = '';
+      closeModal();
+      showToast('Project published! You are the Project Leader.');
+      await loadDashboard();
+    }
+
+    async function sendJoinRequest(projectId) {
+      await fetch(`/api/projects/${projectId}/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.id })
+      });
+      showToast('Join request sent to the Project Leader!');
+      await loadDashboard();
+    }
+
+    async function handleDecision(projectId, userId, action) {
+      await fetch(`/api/projects/${projectId}/requests/${userId}/${action}`, {
+        method: 'POST'
+      });
+      showToast(action === 'accept' ? 'Teammate accepted & group chat updated!' : 'Request declined.');
+      if (action === 'accept') selectedChatProjectId = projectId;
+      await loadDashboard();
+    }
+
+    function renderNotifications(notifications) {
+      const unreadCount = notifications.filter(n => !n.read).length;
+      const badge = document.getElementById('notifBadge');
+      badge.textContent = unreadCount;
+      badge.classList.toggle('visible', unreadCount > 0);
+
+      const list = document.getElementById('notifList');
+      if (!notifications.length) {
+        list.innerHTML = `<p style="font-size:0.8rem;color:var(--ink-muted);">No notifications yet.</p>`;
+        return;
+      }
+
+      list.innerHTML = notifications.map(n => `
+        <div class="notif-item ${n.read ? '' : 'unread'}">
+          <div>${n.text}</div>
+          <div class="notif-time">${n.time}</div>
+        </div>
+      `).join('');
+    }
+
+    function toggleNotifications() {
+      document.getElementById('notifPopup').classList.toggle('open');
+    }
+
+    async function markAllRead() {
+      await fetch(`/api/users/${currentUser.id}/notifications/read`, { method: 'POST' });
+      await loadDashboard();
+    }
+
+    // Initial load + gentle polling so chat and notifications update live
+    loadDashboard();
+    setInterval(loadDashboard, 4000);
+  </script>
+</body>
+</html>

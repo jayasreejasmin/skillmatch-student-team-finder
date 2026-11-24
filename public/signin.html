@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — SkillMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #f5f4f8;
+      --ink-dark: #141928;
+      --ink-slate: #4f566b;
+      --ink-muted: #7c849b;
+      --blue-primary: #1d63ed;
+      --blue-hover: #154ec2;
+      --green-check: #16a34a;
+      --green-bar: #22e55b;
+      --pill-bg: #eef0ff;
+      --pill-text: #4640de;
+      --card-border: #e6e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--ink-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      background-image: radial-gradient(rgba(79, 86, 107, 0.06) 1px, transparent 0);
+      background-size: 18px 18px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Iridescent 3D Pastel Floating Shapes */
+    .blob-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(2px);
+      opacity: 0.85;
+    }
+
+    .blob-1 {
+      width: 340px;
+      height: 150px;
+      top: -35px;
+      left: -60px;
+      transform: rotate(28deg);
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #d9f99d 28%, #86efac 68%, #6ee7b7 100%);
+      box-shadow: inset -12px -16px 28px rgba(16, 185, 129, 0.25), inset 10px 10px 22px rgba(255, 255, 255, 0.9);
+    }
+
+    .blob-2 {
+      width: 140px;
+      height: 140px;
+      top: -55px;
+      left: 46%;
+      background: radial-gradient(circle at 35% 30%, #bbf7d0 0%, #fbcfe8 75%, #f9a8d4 100%);
+      box-shadow: inset -8px -10px 20px rgba(219, 39, 119, 0.15);
+    }
+
+    .blob-3 {
+      width: 330px;
+      height: 290px;
+      top: -60px;
+      right: -70px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff7ed 0%, #fed7aa 40%, #fbcfe8 75%, #fef08a 100%);
+      box-shadow: inset -18px -18px 34px rgba(244, 114, 182, 0.22), inset 14px 14px 26px rgba(255, 255, 255, 0.92);
+    }
+
+    .blob-4 {
+      width: 310px;
+      height: 260px;
+      bottom: -95px;
+      left: 3%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, #c7d2fe 0%, #a5b4fc 45%, #f9a8d4 95%);
+      box-shadow: inset -14px -14px 28px rgba(99, 102, 241, 0.22), inset 10px 10px 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .blob-5 {
+      width: 360px;
+      height: 340px;
+      bottom: -110px;
+      right: 2%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #e0f2fe 0%, #99f6e4 45%, #93c5fd 90%);
+      box-shadow: inset -16px -16px 32px rgba(14, 165, 233, 0.22), inset 12px 12px 24px rgba(255, 255, 255, 0.9);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1140px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 2rem 3rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Minimal Top Header */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.75rem 0;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--ink-slate);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 2px solid var(--ink-slate);
+      display: grid;
+      place-items: center;
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    .back-link {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink-slate);
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--card-border);
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      transition: background 0.15s ease;
+    }
+
+    .back-link:hover { background: #ffffff; }
+
+    /* Split Two-Column Placement */
+    .auth-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      padding: 1.5rem 0 2.5rem;
+    }
+
+    .auth-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.3rem, 4vw, 3.35rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.2rem;
+      color: var(--ink-dark);
+    }
+
+    .outline-word {
+      color: transparent;
+      -webkit-text-stroke: 1.6px var(--ink-slate);
+    }
+
+    .accent-blue { color: var(--blue-primary); }
+
+    .auth-subtitle {
+      font-size: 1.02rem;
+      line-height: 1.6;
+      color: var(--ink-slate);
+      max-width: 460px;
+      margin-bottom: 2rem;
+    }
+
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.35rem;
+      font-size: 0.85rem;
+      color: var(--ink-slate);
+      font-weight: 500;
+      margin-bottom: 2.25rem;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .check-badge {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--green-check);
+      color: #fff;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    /* Mini Live Match Preview Card under Left Copy */
+    .preview-strip {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 18px;
+      padding: 0.85rem;
+      max-width: 440px;
+      box-shadow: 0 18px 40px rgba(20, 25, 40, 0.06);
+    }
+
+    .gradient-banner {
+      background: linear-gradient(125deg, #2563eb 0%, #6d28d9 60%, #8b5cf6 100%);
+      border-radius: 13px;
+      padding: 1.1rem 1.25rem;
+      color: #fff;
+    }
+
+    .banner-header {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .match-metric { margin-bottom: 0.7rem; }
+    .match-metric:last-child { margin-bottom: 0; }
+
+    .metric-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      margin-bottom: 0.3rem;
+      opacity: 0.95;
+    }
+
+    .progress-track {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green-bar);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Right Floating Sign-In Card */
+    .signin-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.98);
+      border-radius: 24px;
+      padding: 2.25rem;
+      box-shadow: 0 26px 55px rgba(20, 25, 40, 0.09);
+    }
+
+    .tab-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #eceef5;
+      padding: 0.3rem;
+      border-radius: 12px;
+      margin-bottom: 1.65rem;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 0.55rem;
+      border-radius: 9px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--ink-slate);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--ink-dark);
+      box-shadow: 0 2px 8px rgba(20, 25, 40, 0.06);
+    }
+
+    .card-heading {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+      color: var(--ink-dark);
+    }
+
+    .card-sub {
+      font-size: 0.88rem;
+      color: var(--ink-slate);
+      margin-bottom: 1.4rem;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-dark);
+      margin-bottom: 0.4rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.78rem 0.95rem;
+      border-radius: 11px;
+      border: 1px solid var(--card-border);
+      background: #ffffff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--ink-dark);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus {
+      border-color: var(--blue-primary);
+      box-shadow: 0 0 0 3px rgba(29, 99, 237, 0.12);
+    }
+
+    /* Quick Skill Tag Picker */
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.55rem;
+    }
+
+    .tag-chip {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      border: none;
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .tag-chip:hover { background: #dfe3ff; }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--blue-primary);
+      color: #ffffff;
+      border: none;
+      padding: 0.88rem;
+      border-radius: 11px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 0.6rem;
+      box-shadow: 0 10px 22px rgba(29, 99, 237, 0.24);
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+
+    .btn-submit:hover {
+      background: var(--blue-hover);
+      transform: translateY(-1px);
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      margin: 1.15rem 0;
+      position: relative;
+    }
+
+    .divider::before, .divider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 34%;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .btn-guest {
+      width: 100%;
+      background: #ffffff;
+      color: var(--ink-dark);
+      border: 1px solid var(--card-border);
+      padding: 0.78rem;
+      border-radius: 11px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-guest:hover { background: #f9fafb; }
+
+    @media (max-width: 880px) {
+      .auth-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob-layer" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+  </div>
+
+  <div class="container">
+    <nav>
+      <a href="/" class="brand-mark">
+        <div class="brand-logo">SM</div>
+        <span>SKILLMATCH</span>
+      </a>
+      <a href="/" class="back-link">← Back to Projects</a>
+    </nav>
+
+    <main class="auth-grid">
+      <!-- Left Block: Headline, Trust Badges & Live AI Match Preview -->
+      <div>
+        <h1 class="auth-title">
+          <span class="outline-word">STEP INTO</span> YOUR<br/>
+          <span class="accent-blue">NEXT</span> <span class="outline-word">TEAM</span>
+        </h1>
+        <p class="auth-subtitle">
+          Sign in with your developer profile and tech stack to unlock ranked project matches and send instant join requests.
+        </p>
+
+        <div class="trust-row">
+          <div class="trust-item"><span class="check-badge">✓</span> Instant skill ranking</div>
+          <div class="trust-item"><span class="check-badge">✓</span> One-click team requests</div>
+          <div class="trust-item"><span class="check-badge">✓</span> Built for student builders</div>
+        </div>
+
+        <div class="preview-strip">
+          <div class="gradient-banner">
+            <div class="banner-header">✦ Live SkillMatch AI Preview</div>
+            <div class="match-metric">
+              <div class="metric-labels">
+                <span>CI/CD Pipeline Automator</span>
+                <span id="liveScore1">95% match</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="liveBar1" style="width: 95%;"></div>
+              </div>
+            </div>
+            <div class="match-metric">
+              <div class="metric-labels">
+                <span>Full Stack Cloud Tracker</span>
+                <span id="liveScore2">82% match</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="liveBar2" style="width: 82%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Block: Dedicated Sign-In / Create Profile Card -->
+      <section class="signin-card">
+        <div class="tab-switch">
+          <button type="button" class="tab-btn active" id="tabNew" onclick="setMode('new')">New Student Profile</button>
+          <button type="button" class="tab-btn" id="tabExisting" onclick="setMode('existing')">Existing Member</button>
+        </div>
+
+        <h2 class="card-heading" id="formHeading">Create Your Builder Profile</h2>
+        <p class="card-sub" id="formSub">Enter your details and click quick tags to populate your stack.</p>
+
+        <form onsubmit="submitSignIn(event)">
+          <div class="field">
+            <label for="fullName">Full Name</label>
+            <input id="fullName" placeholder="e.g. Jayasree Jasmin" required />
+          </div>
+
+          <div class="field" id="emailField">
+            <label for="emailInput">College / GitHub Email</label>
+            <input id="emailInput" type="email" placeholder="e.g. jayasree@university.edu" />
+          </div>
+
+          <div class="field" id="skillsField">
+            <label for="skillsInput">Your Technical Skills (comma-separated)</label>
+            <input id="skillsInput" placeholder="e.g. docker, jenkins, node, react" oninput="updateLiveBars()" />
+            <div class="quick-tags">
+              <button type="button" class="tag-chip" onclick="addSkillTag('docker')">+ Docker</button>
+              <button type="button" class="tag-chip" onclick="addSkillTag('jenkins')">+ Jenkins</button>
+              <button type="button" class="tag-chip" onclick="addSkillTag('kubernetes')">+ Kubernetes</button>
+              <button type="button" class="tag-chip" onclick="addSkillTag('node')">+ Node.js</button>
+              <button type="button" class="tag-chip" onclick="addSkillTag('react')">+ React</button>
+              <button type="button" class="tag-chip" onclick="addSkillTag('python')">+ Python</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">Sign In & View Matches →</button>
+        </form>
+
+        <div class="divider">or</div>
+        <button type="button" class="btn-guest" onclick="window.location.href='/'">Browse Featured Projects as Guest</button>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    let mode = 'new';
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      document.getElementById('tabNew').classList.toggle('active', mode === 'new');
+      document.getElementById('tabExisting').classList.toggle('active', mode === 'existing');
+
+      const skillsField = document.getElementById('skillsField');
+      const skillsInput = document.getElementById('skillsInput');
+
+      if (mode === 'existing') {
+        document.getElementById('formHeading').textContent = 'Welcome Back';
+        document.getElementById('formSub').textContent = 'Sign in with your registered name to load your saved skills.';
+        document.getElementById('emailField').style.display = 'none';
+        skillsField.style.display = 'none';
+        skillsInput.required = false;
+        document.getElementById('submitBtn').textContent = 'Sign In to Dashboard →';
+      } else {
+        document.getElementById('formHeading').textContent = 'Create Your Builder Profile';
+        document.getElementById('formSub').textContent = 'Enter your details and click quick tags to populate your stack.';
+        document.getElementById('emailField').style.display = 'block';
+        skillsField.style.display = 'block';
+        skillsInput.required = true;
+        document.getElementById('submitBtn').textContent = 'Sign In & View Matches →';
+      }
+    }
+
+    function addSkillTag(skill) {
+      const input = document.getElementById('skillsInput');
+      const current = input.value
+        .split(',')
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
+      if (!current.includes(skill)) {
+        current.push(skill);
+        input.value = current.join(', ');
+        updateLiveBars();
+      }
+    }
+
+    function updateLiveBars() {
+      const skills = document.getElementById('skillsInput').value
+        .split(',')
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
+
+      const proj1 = ['docker', 'jenkins', 'node', 'github'];
+      const proj2 = ['react', 'node', 'kubernetes', 'mongodb'];
+
+      const pct1 = skills.length
+        ? Math.min(100, Math.round((proj1.filter(s => skills.includes(s)).length / proj1.length) * 100) || 25)
+        : 95;
+      const pct2 = skills.length
+        ? Math.min(100, Math.round((proj2.filter(s => skills.includes(s)).length / proj2.length) * 100) || 25)
+        : 82;
+
+      document.getElementById('liveScore1').textContent = `${pct1}% match`;
+      document.getElementById('liveBar1').style.width = `${pct1}%`;
+      document.getElementById('liveScore2').textContent = `${pct2}% match`;
+      document.getElementById('liveBar2').style.width = `${pct2}%`;
+    }
+
+    async function submitSignIn(e) {
+      e.preventDefault();
+      const name = document.getElementById('fullName').value.trim();
+      const skills = document.getElementById('skillsInput').value.trim();
+
+      const usersRes = await fetch('/api/users');
+      const users = await usersRes.json();
+      const existing = users.find(u => u.name.trim().toLowerCase() === name.toLowerCase());
+
+      if (mode === 'existing') {
+        if (!existing) {
+          alert(`No account found for "${name}". Switch to "New Student Profile" to create it first.`);
+          return;
+        }
+        localStorage.setItem('skillmatch_user', JSON.stringify(existing));
+        window.location.href = '/dashboard.html';
+        return;
+      }
+
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          skills: skills || (existing ? existing.skills.join(', ') : 'node')
+        })
+      });
+      const user = await res.json();
+      localStorage.setItem('skillmatch_user', JSON.stringify(user));
+      window.location.href = '/dashboard.html';
+    }
+  </script>
+</body>
+</html>
